@@ -6,7 +6,20 @@
 </head>
 <body>
     <h1>Welcome to Save the Stickman!</h1>
-    <p>The game will go here soon...</p>
+    <!-- TEMP: showing the word as blanks -->
+    <p>The word to guess is: <strong>{{ blanks }}</strong></p>
+
+    <!-- Guess a letter form -->
+<form action="/" method="post">
+    <label for="letter">Guess a letter:</label>
+    <input type="text" id="letter" name="letter" maxlength="1" required>
+    <button type="submit">Submit</button>
+</form>
+
+    <!-- Show guessed letter if submitted -->
+    {% if guess %}
+        <p>You guessed: <strong>{{ guess }}</strong></p>
+    {% endif %}
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>

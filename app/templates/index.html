@@ -16,6 +16,16 @@
     <button type="submit">Submit</button>
 </form>
 
+    <!-- reset button-->
+<form action="/reset" method="get">
+    <button type="submit">New Game</button>
+</form>
+
+    <!-- Show guessed letters -->
+{% if guessed %}
+    <p>Letters guessed so far: {{ guessed | join(', ') }}</p>
+{% endif %}
+
     <!-- Show guessed letter if submitted -->
     {% if guess %}
         <p>You guessed: <strong>{{ guess }}</strong></p>

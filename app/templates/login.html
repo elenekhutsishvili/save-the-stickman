@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login to Save the Stickman</title>
+    <!-- Link to your CSS for styling -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Login or Register</h1>
+
+    <!-- If a message was passed from Flask (like an error or success), show it here -->
+    {% if message %}
+        <p style="color: red;"><strong>{{ message }}</strong></p>
+    {% endif %}
+
+    <!-- Login form: sends email + password to the /login route -->
+    <form action="/login" method="post">
+        <!-- Email input field -->
+        <label for="email">Email:</label><br>
+        <input type="email" id="email" name="email" required><br><br>
+
+        <!-- Password input field -->
+        <label for="password">Password:</label><br>
+        <input type="password" id="password" name="password" required><br><br>
+
+        <!-- Button to submit the form -->
+        <button type="submit">Login / Register</button>
+    </form>
+</body>
+</html>

@@ -6,6 +6,11 @@
 </head>
 <body>
     <h1>Welcome to Save the Stickman!</h1>
+
+{% if user_email %}
+    <p><strong>Welcome, {{ user_email }}!</strong></p>
+    <p>Games played: {{ games_played }} | Games won: {{ games_won }}</p>
+{% endif %}
     <!-- TEMP: showing the word as blanks -->
     <p>The word to guess is: <strong>{{ blanks }}</strong></p>
 

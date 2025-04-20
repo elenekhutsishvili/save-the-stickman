@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, session, redirect
 from flask_sqlalchemy import SQLAlchemy
 from flask_session import Session
+from werkzeug.security import generate_password_hash, check_password_hash
 import random
 import os
 
@@ -24,10 +25,69 @@ class Word(db.Model):
     def __repr__(self):
         return f"<Word {self.text}>"
 
+# User table structure
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    # Securely hashed version of the user's password
+    password_hash = db.Column(db.String(128), nullable=False)
+    games_played = db.Column(db.Integer, default=0)
+    games_won = db.Column(db.Integer, default=0)
+
+    # Hash the password before saving to database
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    # Check if the given password matches the stored hash
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+    # String representation of the user (for debugging/logging)
+    def __repr__(self):
+        return f"<User {self.email}>"
+
+# Route to handle login and registration
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    message = None  # Feedback message to show on the page
+
+    if request.method == "POST":
+        # Get email and password from the form
+        email = request.form.get("email")
+        password = request.form.get("password")
+
+        # Check if user already exists
+        user = User.query.filter_by(email=email).first()
+
+        if user:
+            # If user exists, verify the password
+            if user.check_password(password):
+                session["user_id"] = user.id  # Save user ID in session
+                message = "Logged in successfully!"
+                return redirect("/")  # Go to the game page
+            else:
+                message = "Incorrect password."
+        else:
+            # If user does not exist, create a new account
+            new_user = User(email=email)
+            new_user.set_password(password)  # Securely hash the password
+            db.session.add(new_user)
+            db.session.commit()
+            session["user_id"] = new_user.id  # Log the user in
+            message = "Account created successfully!"
+            return redirect("/")  # Go to the game page
+
+    # For GET requests, just show the login form
+    return render_template("login.html", message=message)
+
+
 # homepage route
 @app.route("/", methods=["GET", "POST"])
 def index():
-    print("SESSION START:", dict(session))
+    # 🔐 Redirect to login if not logged in
+    if "user_id" not in session:
+        return redirect("/login")
+
 
      # Only choose a new word if it's not already in session
     if "word" not in session or "guessed" not in session or "wrong" not in session:
@@ -75,11 +135,28 @@ def index():
     elif wrong >= 6:
         game_status = "lose"
 
-    print("SESSION END:", dict(session))
-    print("Selected Word:", session.get("word"))
-    print("Guessed Letters:", session.get("guessed"))
-    print("Wrong Guess Count:", session.get("wrong"))
-    print("SECRET KEY USED:", app.secret_key)
+
+    # Only update stats if the game is over
+    if game_status in ["win", "lose"] and "user_id" in session:
+        user = User.query.get(session["user_id"])
+        if user:
+            user.games_played += 1
+            if game_status == "win":
+                user.games_won += 1
+            db.session.commit()
+
+    # Now get stats to display
+    user_email = None
+    games_played = None
+    games_won = None
+
+    if "user_id" in session:
+        user = User.query.get(session["user_id"])
+        if user:
+            user_email = user.email
+            games_played = user.games_played
+            games_won = user.games_won        
+
     return render_template(
         "index.html", 
         word=selected_word, 
@@ -87,13 +164,25 @@ def index():
         guess=guessed_letter, 
         guessed=guessed_letters, 
         wrong=wrong,
-        status=game_status
+        status=game_status,
+        user_email=user_email,
+        games_played=games_played,
+        games_won=games_won
 )
 
 # reset route
 @app.route("/reset")
 def reset():
+    # Save the user's ID before clearing session
+    user_id = session.get("user_id")
+
+    # Clear everything else (word, guessed, wrong, etc.)
     session.clear()
+
+    # Restore the user so they don't get logged out
+    if user_id:
+        session["user_id"] = user_id
+
     return redirect("/")
 
 # run app / create database

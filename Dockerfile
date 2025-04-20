@@ -3,6 +3,8 @@ FROM python:3.12
 
 # Set the working directory in the container
 WORKDIR /app
+ENV FLASK_SECRET_KEY=stickman_secret_2025
+
 
 # Copy all files from current directory to container's /app folder
 COPY . .

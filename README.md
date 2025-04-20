@@ -24,3 +24,10 @@ pip install -r requirements.txt
 ```bash
 source venv/bin/activate
 python3 app/main.py
+
+
+## run on docker
+docker-compose down
+docker-compose up --build
+http://localhost:5000
+

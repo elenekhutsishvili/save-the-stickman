@@ -30,4 +30,10 @@ python3 app/main.py
 docker-compose down
 docker-compose up --build
 http://localhost:5000
+http://localhost:5000/login
 
+
+## git commit
+git add .
+git commit -m "Add win/lose logic and final game messages"
+git push

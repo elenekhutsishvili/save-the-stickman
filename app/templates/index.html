@@ -11,6 +11,11 @@
     <p><strong>Welcome, {{ user_email }}!</strong></p>
     <p>Games played: {{ games_played }} | Games won: {{ games_won }}</p>
 {% endif %}
+
+<!-- add logout button -->
+<form action="/logout" method="get">
+    <button type="submit">Logout</button>
+</form>
     <!-- TEMP: showing the word as blanks -->
     <p>The word to guess is: <strong>{{ blanks }}</strong></p>
 
@@ -19,6 +24,10 @@
     <label for="letter">Guess a letter:</label>
     <input type="text" id="letter" name="letter" maxlength="1" required {% if status != 'playing' %}disabled{% endif %}>
     <button type="submit" {% if status != 'playing' %}disabled{% endif %}>Submit</button>
+</form>
+
+<form action="/hint" method="get">
+    <button type="submit">Get a Hint</button>
 </form>
 
     <!-- reset button-->
@@ -38,6 +47,11 @@
     <p>Letters guessed so far: {{ guessed | join(', ') }}</p>
     <p>Wrong guesses: {{ session['wrong'] }} / 6</p> <!-- show wrong guess count-->
 
+{% endif %}
+
+<!-- drawing stickman -->
+{% if stickman %}
+    <pre style="font-size: 2em;">{{ stickman }}</pre>
 {% endif %}
 
     <!-- Show guessed letter if submitted -->

@@ -80,6 +80,18 @@ def login():
     # For GET requests, just show the login form
     return render_template("login.html", message=message)
 
+def get_stickman_stage(wrong_guesses):
+    stickman_stages = [
+        "",  # 0 wrong
+        "😵",  # 1 wrong
+        "😵\n🪢",  # 2 wrong
+        "😵\n🫲🪢",  # 3 wrong
+        "😵\n🫲🪢🫱",  # 4 wrong
+        "😵\n🫲🪢🫱\n🦵",  # 5 wrong
+        "😵\n🫲🪢🫱\n🦵🦿"  # 6 wrong
+    ]
+    return stickman_stages[min(wrong_guesses, 6)]
+
 
 # homepage route
 @app.route("/", methods=["GET", "POST"])
@@ -94,8 +106,8 @@ def index():
         words = Word.query.all()
         if not words:
             return "No words in database!"
-        selected_word = random.choice(words).text
-        session["word"] = selected_word
+        selected = random.choice(words).text
+        session["word"] = selected
         session["guessed"] = []  # 🔥 Initialize guessed letter list
         session["wrong"] = 0 # initialize sessopm wrong if not set
 
@@ -157,9 +169,12 @@ def index():
             games_played = user.games_played
             games_won = user.games_won        
 
+
+    stickman = get_stickman_stage(wrong)
+
     return render_template(
         "index.html", 
-        word=selected_word, 
+        word=selected_word,
         blanks=blank_word, 
         guess=guessed_letter, 
         guessed=guessed_letters, 
@@ -167,7 +182,9 @@ def index():
         status=game_status,
         user_email=user_email,
         games_played=games_played,
-        games_won=games_won
+        games_won=games_won,
+        stickman=stickman
+
 )
 
 # reset route
@@ -182,6 +199,28 @@ def reset():
     # Restore the user so they don't get logged out
     if user_id:
         session["user_id"] = user_id
+
+    return redirect("/")
+
+@app.route("/logout")
+def logout():
+    session.clear()  # Clear all session data
+    return redirect("/login")  # Send user back to login page
+
+@app.route("/hint")
+def hint():
+    if "word" in session and "guessed" in session:
+        word = session["word"]
+        guessed = session["guessed"]
+
+        # Find unguessed letters in the word
+        unguessed_letters = [letter for letter in word if letter not in guessed]
+
+        if unguessed_letters:
+            # Pick one random unguessed letter
+            new_hint_letter = random.choice(unguessed_letters)
+            guessed.append(new_hint_letter)
+            session["guessed"] = guessed
 
     return redirect("/")
 

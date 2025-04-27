@@ -3,6 +3,21 @@ console.log("Script loaded successfully!");
 const canvas = document.getElementById('stickmanCanvas');
 const ctx = canvas.getContext('2d');
 
+// Prevent entering numbers
+document.addEventListener('DOMContentLoaded', function() {
+    const letterInput = document.getElementById('letter');
+
+    if (letterInput) {
+        letterInput.addEventListener('input', function() {
+            const value = letterInput.value;
+            if (!/^[a-zA-Z]$/.test(value)) {
+                letterInput.value = '';
+                alert('Please enter a valid letter (A-Z only).');
+            }
+        });
+    }
+});
+
 function drawGallows() {
     // Base
     ctx.beginPath();

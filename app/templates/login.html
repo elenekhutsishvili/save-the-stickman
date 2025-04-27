@@ -4,8 +4,11 @@
     <title>Login to Save the Stickman</title>
     <!-- Link to your CSS for styling -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    
 </head>
 <body>
+    <div class="container">
+
     <h1>Login or Register</h1>
 
     <!-- If a message was passed from Flask (like an error or success), show it here -->
@@ -26,5 +29,7 @@
         <!-- Button to submit the form -->
         <button type="submit">Login / Register</button>
     </form>
+</div>
+
 </body>
 </html>

@@ -31,7 +31,8 @@
 </form>
 
 <form action="/hint" method="get">
-    <button type="submit" class="hint-button">Get a Hint</button>
+    <button type="submit" class="hint-button" 
+    {% if status != 'playing' or session['hint_used'] %}disabled{% endif %}>Get a Hint</button>
 </form>
 
     <!-- reset button-->

@@ -110,6 +110,7 @@ def index():
         session["word"] = selected
         session["guessed"] = []  # 🔥 Initialize guessed letter list
         session["wrong"] = 0 # initialize sessopm wrong if not set
+        session["hint_used"] = False  # 🔥 Initialize hint_used
 
 
     # Pull values from session
@@ -213,6 +214,19 @@ def hint():
         word = session["word"]
         guessed = session["guessed"]
 
+        # 🛑 First check if game is still playing
+        blanks = " ".join([letter if letter in guessed else "_" for letter in word])
+
+        if "_" not in blanks or session.get("wrong", 0) >= 6:
+            # Game already won or lost → do not give hints
+            return redirect("/")
+
+        # 🛑 Check if hint is already used
+        if session.get("hint_used", False):
+            # Hint already used, do nothing
+            return redirect("/")
+
+
         # Find unguessed letters in the word
         unguessed_letters = [letter for letter in word if letter not in guessed]
 
@@ -221,6 +235,8 @@ def hint():
             new_hint_letter = random.choice(unguessed_letters)
             guessed.append(new_hint_letter)
             session["guessed"] = guessed
+            session["hint_used"] = True  # 🔥 Mark hint as used!
+
 
     return redirect("/")
 

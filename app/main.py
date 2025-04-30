@@ -124,15 +124,20 @@ def index():
         guessed_letter = request.form.get("letter")
 
         if guessed_letter:
-            guessed = session.get("guessed", [])
+            #check if input is single letter
+            if guessed_letter.isalpha() and len(guessed_letter) == 1:
+                guessed = session.get("guessed", [])
 
-            if guessed_letter.lower() not in guessed:
-                guessed.append(guessed_letter.lower())
-                session["guessed"] = guessed
+                # Normalize guess to lowercase
+                guess_lower = guessed_letter.lower()
 
-                if guessed_letter.lower() not in selected_word:
-                    wrong += 1
-                    session["wrong"] = wrong
+                if guess_lower not in guessed:
+                    guessed.append(guess_lower)
+                    session["guessed"] = guessed
+
+                    if guess_lower not in selected_word.lower():
+                        wrong += 1
+                        session["wrong"] = wrong
            
 
     # 🔍 Build the displayed blank word with guessed letters revealed

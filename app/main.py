@@ -1,10 +1,12 @@
-from flask import Flask, render_template, request, session, redirect
-from flask_sqlalchemy import SQLAlchemy
-from flask_session import Session
-from werkzeug.security import generate_password_hash, check_password_hash
-import random
+from flask import Flask, render_template, request, session, redirect #framework
+from flask_sqlalchemy import SQLAlchemy #database
+from flask_session import Session #storing user and game state
+from werkzeug.security import generate_password_hash, check_password_hash #password security
+import random #wordselection
 import os
 
+
+# flask setup
 app = Flask(__name__)
 app.config['SESSION_TYPE'] = 'filesystem'
 Session(app)
@@ -17,15 +19,16 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-# table structure 
+# table structure - stores words for the game
 class Word(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     text = db.Column(db.String(100), nullable=False)
 
+    # string representattion for word
     def __repr__(self):
         return f"<Word {self.text}>"
 
-# User table structure
+# User table structure - stores users and game stats
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
@@ -46,7 +49,7 @@ class User(db.Model):
     def __repr__(self):
         return f"<User {self.email}>"
 
-# Route to handle login and registration
+# handles login and registration
 @app.route("/login", methods=["GET", "POST"])
 def login():
     message = None  # Feedback message to show on the page
@@ -80,37 +83,24 @@ def login():
     # For GET requests, just show the login form
     return render_template("login.html", message=message)
 
-def get_stickman_stage(wrong_guesses):
-    stickman_stages = [
-        "",  # 0 wrong
-        "😵",  # 1 wrong
-        "😵\n🪢",  # 2 wrong
-        "😵\n🫲🪢",  # 3 wrong
-        "😵\n🫲🪢🫱",  # 4 wrong
-        "😵\n🫲🪢🫱\n🦵",  # 5 wrong
-        "😵\n🫲🪢🫱\n🦵🦿"  # 6 wrong
-    ]
-    return stickman_stages[min(wrong_guesses, 6)]
-
-
 # homepage route
 @app.route("/", methods=["GET", "POST"])
 def index():
-    # 🔐 Redirect to login if not logged in
+    # check if user is logged in
     if "user_id" not in session:
         return redirect("/login")
 
 
-     # Only choose a new word if it's not already in session
+     # check if game started
     if "word" not in session or "guessed" not in session or "wrong" not in session:
         words = Word.query.all()
         if not words:
             return "No words in database!"
         selected = random.choice(words).text
         session["word"] = selected
-        session["guessed"] = []  # 🔥 Initialize guessed letter list
-        session["wrong"] = 0 # initialize sessopm wrong if not set
-        session["hint_used"] = False  # 🔥 Initialize hint_used
+        session["guessed"] = []  # list of guessed letters
+        session["wrong"] = 0 # count wrong guesses
+        session["hint_used"] = False  # hint is not used yet
 
 
     # Pull values from session
@@ -124,32 +114,34 @@ def index():
         guessed_letter = request.form.get("letter")
 
         if guessed_letter:
-            #check if input is single letter
+            #check if input is single letter (no num or symbol)
             if guessed_letter.isalpha() and len(guessed_letter) == 1:
                 guessed = session.get("guessed", [])
 
                 # Normalize guess to lowercase
                 guess_lower = guessed_letter.lower()
-
+                
+                # if this letter is not guessed yet add to list
                 if guess_lower not in guessed:
                     guessed.append(guess_lower)
                     session["guessed"] = guessed
 
+                    #if letter is wrong add to wrong count
                     if guess_lower not in selected_word.lower():
                         wrong += 1
                         session["wrong"] = wrong
            
-
-    # 🔍 Build the displayed blank word with guessed letters revealed
-   
-    #show correct guesses hide others
-    blank_word = " ".join([letter if letter in guessed_letters else "_" for letter in selected_word])
+    # word display with blanks & show correct guesses
+    blank_word = " ".join([letter if letter.lower() in guessed_letters else "_" for letter in selected_word])
 
     # Determine game status
     game_status = "playing"
 
+    #if all letters are guessed right player won
     if "_" not in blank_word:
         game_status = "win"
+
+    # if 6 or more wring guesses player lost
     elif wrong >= 6:
         game_status = "lose"
 
@@ -163,11 +155,12 @@ def index():
                 user.games_won += 1
             db.session.commit()
 
-    # Now get stats to display
+    # defeault stat values
     user_email = None
     games_played = None
     games_won = None
 
+    #assign values to stats
     if "user_id" in session:
         user = User.query.get(session["user_id"])
         if user:
@@ -176,8 +169,7 @@ def index():
             games_won = user.games_won        
 
 
-    stickman = get_stickman_stage(wrong)
-
+    # send data to html template
     return render_template(
         "index.html", 
         word=selected_word,
@@ -188,8 +180,7 @@ def index():
         status=game_status,
         user_email=user_email,
         games_played=games_played,
-        games_won=games_won,
-        stickman=stickman
+        games_won=games_won
 
 )
 
@@ -199,12 +190,14 @@ def reset():
     # Save the user's ID before clearing session
     user_id = session.get("user_id")
 
-    # Clear everything else (word, guessed, wrong, etc.)
+    # Clear everything else (word, guessed, wrong, hint_used, user_id (temporarily))
     session.clear()
 
     # Restore the user so they don't get logged out
     if user_id:
         session["user_id"] = user_id
+        session["hint_used"] = False
+
 
     return redirect("/")
 
@@ -219,14 +212,14 @@ def hint():
         word = session["word"]
         guessed = session["guessed"]
 
-        # 🛑 First check if game is still playing
+        # build blanks to check if game is still playing
         blanks = " ".join([letter if letter in guessed else "_" for letter in word])
 
         if "_" not in blanks or session.get("wrong", 0) >= 6:
-            # Game already won or lost → do not give hints
+            # Game already won or lost so do not give hints
             return redirect("/")
 
-        # 🛑 Check if hint is already used
+        # Check if hint is already used
         if session.get("hint_used", False):
             # Hint already used, do nothing
             return redirect("/")
@@ -239,8 +232,8 @@ def hint():
             # Pick one random unguessed letter
             new_hint_letter = random.choice(unguessed_letters)
             guessed.append(new_hint_letter)
-            session["guessed"] = guessed
-            session["hint_used"] = True  # 🔥 Mark hint as used!
+            session["guessed"] = guessed # add it to guessed list
+            session["hint_used"] = True  # Mark hint as used!
 
 
     return redirect("/")

@@ -1,1 +1,19 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Flask session files
 flask_session/
+
+# Virtual environment
+venv/
+
+# Local database file (optional if you're seeding via words.txt)
+*.db
+
+# Environment variables
+.env
+
+# VSCode or PyCharm project settings (optional)
+.vscode/
+.idea/

@@ -101,6 +101,7 @@ def index():
         session["guessed"] = []  # list of guessed letters
         session["wrong"] = 0 # count wrong guesses
         session["hint_used"] = False  # hint is not used yet
+        session["game_recorded"] = False 
 
 
     # Pull values from session
@@ -147,13 +148,15 @@ def index():
 
 
     # Only update stats if the game is over
-    if game_status in ["win", "lose"] and "user_id" in session:
+    if game_status in ["win", "lose"] and "user_id" in session and not session.get("game_recorded", False):
         user = User.query.get(session["user_id"])
         if user:
             user.games_played += 1
             if game_status == "win":
                 user.games_won += 1
             db.session.commit()
+            session["game_recorded"] = True 
+
 
     # defeault stat values
     user_email = None
@@ -197,6 +200,7 @@ def reset():
     if user_id:
         session["user_id"] = user_id
         session["hint_used"] = False
+        session["game_recorded"] = False
 
 
     return redirect("/")

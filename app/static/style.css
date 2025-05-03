@@ -1,8 +1,6 @@
 
-/* style.css */
-
 body {
-    font-family: 'Manrope', sans-serif;
+    font-family: 'Poppins', sans-serif;
     background-color: #d2e2fa;
     display: flex;
     justify-content: center;
@@ -41,7 +39,7 @@ input[type="text"], input[type="password"] {
     font-size: 1rem;
     border: 1px solid #ccc;
     border-radius: 6px;
-    font-family: 'Manrope', sans-serif;
+    font-family: 'Poppins', sans-serif;
 }
 
 button, input[type="submit"] {
@@ -49,13 +47,13 @@ button, input[type="submit"] {
     font-size: 1rem;
     border: none;
     border-radius: 6px;
-    background-color: #795fed; /* default: green */
+    background-color: #795fed; 
     color: white;
     cursor: pointer;
     transition: background-color 0.3s, transform 0.2s;
-    width: auto; /* ❗ Make button normal width */
+    width: auto; 
     margin: 5px;
-    font-family: 'Manrope', sans-serif; /* 🔥 Add this line */
+    font-family: 'Poppins', sans-serif; 
 
 }
 
@@ -68,31 +66,29 @@ button:hover, input[type="submit"]:hover {
     font-size: 1.8rem;
     letter-spacing: 8px;
     margin-bottom: 20px;
-    font-family: 'Manrope', sans-serif;
+    font-family: 'Poppins', sans-serif;
 }
 
 .game-message {
     font-size: 1.5rem;
     color: red;
     margin-top: 20px;
-    font-family: 'Manrope', sans-serif;
+    font-family: 'Poppins', sans-serif;
 }
 
 .stickman {
     font-size: 3rem;
     margin-top: 30px;
-    font-family: 'Manrope', sans-serif;
+    font-family: 'Poppins', sans-serif;
 }
 
-/* Special buttons */
 .logout-button {
-    background-color: #a01a7e; /* red for logout */
+    background-color: #a01a7e; 
 }
-
 .hint-button {
-    background-color: #032e51; /* blue for hint */
+    background-color: #032e51; 
 }
 
 .newgame-button {
-    background-color: #1dd7eb; /* orange for new game */
+    background-color: #1dd7eb; 
 }

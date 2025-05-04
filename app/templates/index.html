@@ -3,6 +3,7 @@
 <head>
     <title>Save the Stickman</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="container">
@@ -30,12 +31,13 @@
     <button type="submit" {% if status != 'playing' %}disabled{% endif %}>Submit</button>
 </form>
 
+    <!-- hint button -->
 <form action="/hint" method="get">
     <button type="submit" class="hint-button" 
     {% if status != 'playing' or session['hint_used'] %}disabled{% endif %}>Get a Hint</button>
 </form>
 
-    <!-- reset button-->
+    <!-- new game button-->
 <form action="/reset" method="get">
     <button type="submit" class="newgame-button">New Game</button>
 </form>
@@ -44,13 +46,13 @@
 {% if status == 'win' %}
     <h2 style="color: green;">🎉 You guessed the word! You win! 🎉</h2>
 {% elif status == 'lose' %}
-    <h2 style="color: red;">💀 Game Over! The word was: {{ word }}</h2>
+    <h2 style="color: red;">😕 Game Over! The word was: {{ word }}</h2>
 {% endif %}
 
-    <!-- Show guessed letters -->
+    <!-- Show guessed letters and wrong counts-->
 {% if guessed %}
     <p>Letters guessed so far: {{ guessed | join(', ') }}</p>
-    <p>Wrong guesses: {{ session['wrong'] }} / 6</p> <!-- show wrong guess count-->
+    <p>Wrong guesses: {{ session['wrong'] }} / 6</p>
 
 {% endif %}
 

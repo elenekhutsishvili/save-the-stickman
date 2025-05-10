@@ -47,10 +47,10 @@ function drawGallows() {
 function drawStickman(wrongGuesses) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // 🎨 Always draw the gallows first
+    // Always draw the gallows first
     drawGallows();
 
-    // 🧍 Only draw stickman parts based on wrong guesses
+    // Only draw stickman parts based on wrong guesses
     if (wrongGuesses > 0) { // draw head
         ctx.beginPath();
         ctx.arc(150, 70, 20, 0, Math.PI * 2);

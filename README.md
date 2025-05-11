@@ -1,4 +1,14 @@
-### 🛠️ Environment Setup
+
+## Features
+
+-  Random word selection from a predefined list  
+-  Interactive letter-by-letter guessing  
+-  Visual stickman drawing for incorrect guesses  
+-  Win/loss detection logic  
+-  User authentication system with login functionality  
+-  Dockerized setup for streamlined deployment 
+
+## Environment Setup
 
 1. *Clone the repository:*
    
